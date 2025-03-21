@@ -24,7 +24,7 @@ const Login: React.FC<LoginProps> = ({ setToken, setRole }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/login/",
+        "https://jobspark-backend.onrender.com/api/login/",
         credentials
       );
       setToken(response.data.token);

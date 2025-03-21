@@ -34,7 +34,7 @@ const Register: React.FC<RegisterProps> = ({ setToken, setRole }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/register/",
+        "https://jobspark-backend.onrender.com/api/register/",
         formData
       );
       setToken(response.data.token);

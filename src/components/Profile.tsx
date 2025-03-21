@@ -36,7 +36,7 @@ const Profile: React.FC<ProfileProps> = ({ token, role }) => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get<{ profile: ProfileData; jobs: Job[] }>(
-          "http://localhost:8000/api/profile/",
+          "https://jobspark-backend.onrender.com/api/profile/",
           {
             headers: { Authorization: `Token ${token}` },
           }

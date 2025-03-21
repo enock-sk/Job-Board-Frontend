@@ -21,8 +21,8 @@ const JobList: React.FC = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       const url = filter
-        ? `http://localhost:8000/api/jobs/?job_type=${filter}&page=${page}`
-        : `http://localhost:8000/api/jobs/?page=${page}`;
+        ? `https://jobspark-backend.onrender.com/api/jobs/?job_type=${filter}&page=${page}`
+        : `https://jobspark-backend.onrender.com/api/jobs/?page=${page}`;
       try {
         const response = await axios.get<{ results: Job[]; count: number }>(
           url
