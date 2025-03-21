@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button, Form, Pagination } from "react-bootstrap";
+import { Card, Button, Form, Pagination, Alert } from "react-bootstrap";
 
 interface Job {
   id: number;
@@ -17,6 +17,7 @@ const JobList: React.FC = () => {
   const [filter, setFilter] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [error, setError] = useState<string | null>(null); // Add error state
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -27,10 +28,13 @@ const JobList: React.FC = () => {
         const response = await axios.get<{ results: Job[]; count: number }>(
           url
         );
-        setJobs(response.data.results);
+        setJobs(response.data.results || []); // Fallback to empty array if results is undefined
         setTotalPages(Math.ceil(response.data.count / 10));
+        setError(null); // Clear error on success
       } catch (error) {
         console.error("Error fetching jobs:", error);
+        setError("Failed to load jobs. Please try again later.");
+        setJobs([]); // Reset jobs to empty array on error
       }
     };
     fetchJobs();
@@ -68,72 +72,90 @@ const JobList: React.FC = () => {
         <option value="Part-Time">Part-Time Jobs</option>
         <option value="Internship">Internships</option>
       </Form.Select>
-      <div className="row">
-        {jobs.map((job) => (
-          <div key={job.id} className="col-md-4 mb-4">
-            <Card
-              className="shadow h-100"
-              style={{
-                borderRadius: "15px",
-                transition: "transform 0.3s, box-shadow 0.3s",
-                border: "none",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-10px)";
-                e.currentTarget.style.boxShadow =
-                  "0 10px 20px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
-              }}
+
+      {/* Display error message if fetch fails */}
+      {error && (
+        <Alert variant="danger" className="text-center">
+          {error}
+        </Alert>
+      )}
+
+      {/* Only render job cards if jobs is an array with items */}
+      {jobs.length > 0 ? (
+        <div className="row">
+          {jobs.map((job) => (
+            <div key={job.id} className="col-md-4 mb-4">
+              <Card
+                className="shadow h-100"
+                style={{
+                  borderRadius: "15px",
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  border: "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-10px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 10px 20px rgba(0,0,0,0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 10px rgba(0,0,0,0.1)";
+                }}
+              >
+                <Card.Body>
+                  <Card.Title style={{ color: "#6a11cb", fontWeight: "600" }}>
+                    {job.title}
+                  </Card.Title>
+                  <Card.Subtitle className="mb-2 text-muted">
+                    {job.company} - {job.location}
+                  </Card.Subtitle>
+                  <Card.Text>
+                    <strong>Type:</strong> {job.job_type}
+                  </Card.Text>
+                  <Card.Text>
+                    <strong>Salary:</strong> {job.salary || "Not specified"}
+                  </Card.Text>
+                  <Card.Text className="text-truncate">
+                    {job.description}
+                  </Card.Text>
+                  <Button
+                    variant="outline-primary"
+                    style={{ borderRadius: "20px", padding: "8px 20px" }}
+                  >
+                    Apply Now
+                  </Button>
+                </Card.Body>
+              </Card>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-muted">No jobs available.</p>
+      )}
+
+      {/* Pagination only if there are pages */}
+      {totalPages > 1 && (
+        <Pagination className="justify-content-center mt-4">
+          <Pagination.Prev
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+          />
+          {[...Array(totalPages)].map((_, i) => (
+            <Pagination.Item
+              key={i + 1}
+              active={i + 1 === page}
+              onClick={() => handlePageChange(i + 1)}
             >
-              <Card.Body>
-                <Card.Title style={{ color: "#6a11cb", fontWeight: "600" }}>
-                  {job.title}
-                </Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">
-                  {job.company} - {job.location}
-                </Card.Subtitle>
-                <Card.Text>
-                  <strong>Type:</strong> {job.job_type}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Salary:</strong> {job.salary || "Not specified"}
-                </Card.Text>
-                <Card.Text className="text-truncate">
-                  {job.description}
-                </Card.Text>
-                <Button
-                  variant="outline-primary"
-                  style={{ borderRadius: "20px", padding: "8px 20px" }}
-                >
-                  Apply Now
-                </Button>
-              </Card.Body>
-            </Card>
-          </div>
-        ))}
-      </div>
-      <Pagination className="justify-content-center mt-4">
-        <Pagination.Prev
-          onClick={() => handlePageChange(page - 1)}
-          disabled={page === 1}
-        />
-        {[...Array(totalPages)].map((_, i) => (
-          <Pagination.Item
-            key={i + 1}
-            active={i + 1 === page}
-            onClick={() => handlePageChange(i + 1)}
-          >
-            {i + 1}
-          </Pagination.Item>
-        ))}
-        <Pagination.Next
-          onClick={() => handlePageChange(page + 1)}
-          disabled={page === totalPages}
-        />
-      </Pagination>
+              {i + 1}
+            </Pagination.Item>
+          ))}
+          <Pagination.Next
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+          />
+        </Pagination>
+      )}
     </div>
   );
 };
