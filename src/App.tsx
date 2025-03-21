@@ -1,10 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
-import JobList from "./JobList";
-import Register from "./Register";
-import Login from "./Login";
-import Footer from "./Footer";
+import JobList from "./components/JobList";
+import Register from "./components/Register";
+import Login from "./components/Login";
+import Footer from "./components/Footer";
 
 const App: React.FC = () => {
   return (
