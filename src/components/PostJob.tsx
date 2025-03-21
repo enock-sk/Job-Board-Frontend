@@ -49,7 +49,7 @@ const PostJob: React.FC<PostJobProps> = ({ token, role }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://jobspark-backend.onrender.com/api/post-job/",
+        "https://jobspark-backend.onrender.com/api/jobs/create/",
         formData,
         {
           headers: { Authorization: `Token ${token}` },

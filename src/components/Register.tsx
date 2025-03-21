@@ -25,7 +25,7 @@ const Register: React.FC<RegisterProps> = ({ setToken, setRole }) => {
 
     try {
       const response = await axios.post(
-        "https://jobspark-backend.onrender.com/api/register/",
+        "https://jobspark-backend.onrender.com/api/auth/register/",
         {
           username,
           email,

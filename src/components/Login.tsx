@@ -22,7 +22,7 @@ const Login: React.FC<LoginProps> = ({ setToken, setRole }) => {
 
     try {
       const response = await axios.post(
-        "https://jobspark-backend.onrender.com/api/login/",
+        "https://jobspark-backend.onrender.com/api/auth/login/",
         {
           username,
           password,
@@ -32,7 +32,7 @@ const Login: React.FC<LoginProps> = ({ setToken, setRole }) => {
       const user = response.data.user;
       // Note: Backend doesn’t return role, so we’ll infer it from UserProfile if needed
       const roleResponse = await axios.get(
-        "https://jobspark-backend.onrender.com/api/user-profile/",
+        "https://jobspark-backend.onrender.com/api/profile/",
         {
           headers: { Authorization: `Token ${token}` },
         }
