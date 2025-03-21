@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 import axios from "axios";
 import { Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const Register: React.FC = () => {
+interface RegisterProps {
+  setToken: Dispatch<SetStateAction<string | null>>;
+  setRole: Dispatch<SetStateAction<string | null>>;
+}
+
+const Register: React.FC<RegisterProps> = ({ setToken, setRole }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,8 +34,13 @@ const Register: React.FC = () => {
           company_name: isEmployer ? companyName : "",
         }
       );
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const token = response.data.token;
+      const user = response.data.user;
+      setToken(token);
+      setRole(isEmployer ? "employer" : "jobseeker");
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", isEmployer ? "employer" : "jobseeker");
       setSuccess("Registration successful! Redirecting to jobs...");
       setTimeout(() => navigate("/jobs"), 2000);
     } catch (err: any) {

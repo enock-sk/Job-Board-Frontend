@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 import axios from "axios";
 import { Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const Login: React.FC = () => {
+interface LoginProps {
+  setToken: Dispatch<SetStateAction<string | null>>;
+  setRole: Dispatch<SetStateAction<string | null>>;
+}
+
+const Login: React.FC<LoginProps> = ({ setToken, setRole }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +28,21 @@ const Login: React.FC = () => {
           password,
         }
       );
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const token = response.data.token;
+      const user = response.data.user;
+      // Note: Backend doesn’t return role, so we’ll infer it from UserProfile if needed
+      const roleResponse = await axios.get(
+        "https://jobspark-backend.onrender.com/api/user-profile/",
+        {
+          headers: { Authorization: `Token ${token}` },
+        }
+      );
+      const isEmployer = roleResponse.data.is_employer;
+      setToken(token);
+      setRole(isEmployer ? "employer" : "jobseeker");
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", isEmployer ? "employer" : "jobseeker");
       setSuccess("Login successful! Redirecting to jobs...");
       setTimeout(() => navigate("/jobs"), 2000);
     } catch (err: any) {
