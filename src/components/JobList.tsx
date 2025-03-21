@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button, Form, Pagination, Alert } from "react-bootstrap";
+import { Card, Button, Form, Alert } from "react-bootstrap";
 
 interface Job {
   id: number;
@@ -10,41 +10,34 @@ interface Job {
   location: string;
   salary: string;
   job_type: string;
+  user?: { id: number; username: string }; // Optional user field
+  is_active?: boolean; // Optional fields from response
+  created_at?: string;
+  updated_at?: string;
 }
 
 const JobList: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filter, setFilter] = useState<string>("");
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [error, setError] = useState<string | null>(null); // Add error state
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
       const url = filter
-        ? `https://jobspark-backend.onrender.com/api/jobs/?job_type=${filter}&page=${page}`
-        : `https://jobspark-backend.onrender.com/api/jobs/?page=${page}`;
+        ? `https://jobspark-backend.onrender.com/api/jobs/?job_type=${filter}`
+        : `https://jobspark-backend.onrender.com/api/jobs/`;
       try {
-        const response = await axios.get<{ results: Job[]; count: number }>(
-          url
-        );
-        setJobs(response.data.results || []); // Fallback to empty array if results is undefined
-        setTotalPages(Math.ceil(response.data.count / 10));
-        setError(null); // Clear error on success
+        const response = await axios.get<Job[]>(url); // Expect flat array
+        setJobs(response.data || []);
+        setError(null);
       } catch (error) {
         console.error("Error fetching jobs:", error);
         setError("Failed to load jobs. Please try again later.");
-        setJobs([]); // Reset jobs to empty array on error
+        setJobs([]);
       }
     };
     fetchJobs();
-  }, [filter, page]);
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
+  }, [filter]);
 
   return (
     <div>
@@ -61,10 +54,7 @@ const JobList: React.FC = () => {
       <Form.Select
         className="mb-5 w-50 mx-auto shadow-sm"
         value={filter}
-        onChange={(e) => {
-          setFilter(e.target.value);
-          setPage(1);
-        }}
+        onChange={(e) => setFilter(e.target.value)}
         style={{ borderRadius: "20px", padding: "10px" }}
       >
         <option value="">All Opportunities</option>
@@ -73,14 +63,12 @@ const JobList: React.FC = () => {
         <option value="Internship">Internships</option>
       </Form.Select>
 
-      {/* Display error message if fetch fails */}
       {error && (
         <Alert variant="danger" className="text-center">
           {error}
         </Alert>
       )}
 
-      {/* Only render job cards if jobs is an array with items */}
       {jobs.length > 0 ? (
         <div className="row">
           {jobs.map((job) => (
@@ -132,29 +120,6 @@ const JobList: React.FC = () => {
         </div>
       ) : (
         <p className="text-center text-muted">No jobs available.</p>
-      )}
-
-      {/* Pagination only if there are pages */}
-      {totalPages > 1 && (
-        <Pagination className="justify-content-center mt-4">
-          <Pagination.Prev
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1}
-          />
-          {[...Array(totalPages)].map((_, i) => (
-            <Pagination.Item
-              key={i + 1}
-              active={i + 1 === page}
-              onClick={() => handlePageChange(i + 1)}
-            >
-              {i + 1}
-            </Pagination.Item>
-          ))}
-          <Pagination.Next
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page === totalPages}
-          />
-        </Pagination>
       )}
     </div>
   );
